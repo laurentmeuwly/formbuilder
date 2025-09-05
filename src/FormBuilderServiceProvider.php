@@ -14,7 +14,11 @@ class FormBuilderServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__.'/../config/formbuilder.php', 'formbuilder');
-        $this->app->bind(RendersForm::class, fn () => new NullRenderer());
+
+        $this->app->singleton(RendersForm::class, function ($app) {
+            $class = config('formbuilder.renderer', NullRenderer::class);
+            return $app->make($class);
+        });
     }
 
     public function boot(): void
