@@ -5,10 +5,13 @@ namespace LaurentMeuwly\FormBuilder\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use LaurentMeuwly\FormBuilder\Traits\UsesConfiguredTable;
 
 class AnswerSet extends Model
 {
-    protected $table = 'fb_answer_sets';
+    use UsesConfiguredTable;
+
+    public const TABLE_CONFIG_KEY = 'answer_sets';    
 
     protected $fillable = [
         'form_id',
@@ -25,12 +28,14 @@ class AnswerSet extends Model
 
     public function form(): BelongsTo
     {
-        return $this->belongsTo(Form::class);
+        $formClass = config('formbuilder.models.form');
+        return $this->belongsTo($formClass);
     }
 
     public function answers(): HasMany
     {
-        return $this->hasMany(Answer::class);
+        $answerClass = config('formbuilder.models.answer');
+        return $this->hasMany($answerClass);
     }
 
     public function answerable()

@@ -4,10 +4,13 @@ namespace LaurentMeuwly\FormBuilder\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use LaurentMeuwly\FormBuilder\Traits\UsesConfiguredTable;
 
 class BranchingRule extends Model
 {
-    protected $table = 'fb_branching_rules';
+    use UsesConfiguredTable;
+
+    public const TABLE_CONFIG_KEY = 'branching_rules';    
 
     protected $fillable = [
         'form_id',
@@ -22,6 +25,7 @@ class BranchingRule extends Model
 
     public function form(): BelongsTo
     {
-        return $this->belongsTo(Form::class);
+        $formClass = config('formbuilder.models.form');
+        return $this->belongsTo($formClass);
     }
 }

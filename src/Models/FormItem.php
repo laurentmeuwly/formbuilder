@@ -5,10 +5,13 @@ namespace LaurentMeuwly\FormBuilder\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use LaurentMeuwly\FormBuilder\Enums\FormFieldType;
+use LaurentMeuwly\FormBuilder\Traits\UsesConfiguredTable;
 
 class FormItem extends Model
 {
-    protected $table = 'fb_form_items';
+    use UsesConfiguredTable;
+
+    public const TABLE_CONFIG_KEY = 'form_items';
 
     protected $fillable = [
         'form_id',
@@ -30,6 +33,7 @@ class FormItem extends Model
 
     public function form(): BelongsTo
     {
-        return $this->belongsTo(Form::class);
+        $formClass = config('formbuilder.models.form');
+        return $this->belongsTo($formClass);
     }
 }

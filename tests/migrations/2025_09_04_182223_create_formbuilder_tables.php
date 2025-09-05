@@ -19,7 +19,6 @@ return new class extends Migration
             $table->id();
             $table->string('key')->index();
             $table->string('title');
-            $table->string('locale', 10)->default('fr');
             $table->json('meta')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();

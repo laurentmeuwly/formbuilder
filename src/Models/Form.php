@@ -2,9 +2,9 @@
 
 namespace LaurentMeuwly\FormBuilder\Models;
 
-use LaurentMeuwly\FormBuilder\Traits\UsesConfiguredTable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use LaurentMeuwly\FormBuilder\Traits\UsesConfiguredTable;
 
 class Form extends Model
 {
@@ -27,11 +27,13 @@ class Form extends Model
 
     public function items(): HasMany
     {
-        return $this->hasMany(FormItem::class)->orderBy('position');
+        $itemClass = config('formbuilder.models.form_item');
+        return $this->hasMany($itemClass)->orderBy('position');
     }
 
     public function branchingRules(): HasMany
     {
-        return $this->hasMany(BranchingRule::class);
+        $ruleClass = config('formbuilder.models.branching');
+        return $this->hasMany($ruleClass);
     }
 }

@@ -35,8 +35,7 @@ it('runs full flow: migrations, CRUD, rendering, validation, answers', function 
     // 2) Crée un formulaire + champs + règle
     $form = Form::create([
         'key'       => 'technical_questionnaire_v1',
-        'title'     => 'Questionnaire technique',
-        'locale'    => 'fr',
+        'title'     => 'Questionnaire technique',        
         'is_active' => true,
     ]);
 
