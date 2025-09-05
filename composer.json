@@ -1,0 +1,57 @@
+{
+    "name": "laurentmeuwly/formbuilder",
+    "description": "Advanced form builder for Laravel 11 and up",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Laurent Meuwly",
+            "email": "laurent@lmeuwly.ch",
+            "homepage": "https://axonium.ch",
+            "role": "Developer"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "LaurentMeuwly\\FormBuilder\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "LaurentMeuwly\\FormBuilder\\Tests\\": "tests"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "LaurentMeuwly\\FormBuilder\\FormBuilderServiceProvider"
+            ],
+            "aliases": {
+                "FormBuilder": "LaurentMeuwly\\FormBuilder\\Facades\\FormBuilder"
+            }
+        }
+    },
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^11.0",
+        "illuminate/database": "^11.0",
+        "illuminate/validation": "^11.0"        
+    },
+    "require-dev": {
+        "laravel/passport": "^11.0|^12.0",
+        "laravel/pint": "^1.0",
+        "orchestra/testbench": "^9.0|^10.0",
+        "phpunit/phpunit": "^11.5",
+        "pestphp/pest": "^3.0"
+    },
+    "suggest": {
+        "filament/forms": "^3.2 pour le rendu Filament"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    }
+}
