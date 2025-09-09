@@ -34,6 +34,6 @@ class FormItem extends Model
     public function form(): BelongsTo
     {
         $formClass = config('formbuilder.models.form');
-        return $this->belongsTo($formClass);
+        return $this->belongsTo($formClass, 'form_id');
     }
 }

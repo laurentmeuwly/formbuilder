@@ -14,8 +14,7 @@ class Form extends Model
 
     protected $fillable = [
         'key',      // ex: technical_questionnaire
-        'title',
-        'locale',   // fr, en, etc.
+        'title',        
         'meta',     // json: description, help, etc.
         'is_active',
     ];
@@ -28,12 +27,12 @@ class Form extends Model
     public function items(): HasMany
     {
         $itemClass = config('formbuilder.models.form_item');
-        return $this->hasMany($itemClass)->orderBy('position');
+        return $this->hasMany($itemClass, 'form_id')->orderBy('position');
     }
 
     public function branchingRules(): HasMany
     {
         $ruleClass = config('formbuilder.models.branching');
-        return $this->hasMany($ruleClass);
+        return $this->hasMany($ruleClass, 'form_id');
     }
 }
