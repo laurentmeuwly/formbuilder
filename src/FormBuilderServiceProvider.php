@@ -31,9 +31,7 @@ class FormBuilderServiceProvider extends ServiceProvider
             __DIR__.'/../database/migrations/create_formbuilder_tables.php.stub' => $this->getMigrationFileName('create_formbuilder_tables.php'),
         ], 'formbuilder-migrations');
 
-        $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
-        $this->loadViewsFrom(__DIR__.'/../resources/views', 'mp');
-        //$this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+        $this->loadRoutesFrom(__DIR__.'/../routes/web.php');        
     }
 
     /**
