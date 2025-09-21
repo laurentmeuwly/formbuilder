@@ -4,6 +4,7 @@ namespace LaurentMeuwly\FormBuilder\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 use LaurentMeuwly\FormBuilder\Traits\UsesConfiguredTable;
 
 class Form extends Model
@@ -23,6 +24,20 @@ class Form extends Model
         'meta' => 'array',
         'is_active' => 'boolean',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Form $form) {
+            if (empty($form->key)) {
+                $form->key = Str::slug($form->title ?? 'form') ?: (string) Str::uuid();
+
+                $suffix = 1;
+                while (self::where('key', $form->key)->exists()) {
+                    $form->key = $form->key.'_'.$suffix++;
+                }
+            }
+        });
+    }
 
     public function items(): HasMany
     {

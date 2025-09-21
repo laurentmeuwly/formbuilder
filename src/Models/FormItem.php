@@ -4,6 +4,7 @@ namespace LaurentMeuwly\FormBuilder\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 use LaurentMeuwly\FormBuilder\Enums\FormFieldType;
 use LaurentMeuwly\FormBuilder\Traits\UsesConfiguredTable;
 
@@ -31,6 +32,25 @@ class FormItem extends Model
         'meta' => 'array',
     ];
 
+    protected static function booted(): void
+    {
+        static::creating(function (FormItem $item) {
+            if (empty($item->key)) {
+                
+                $base = Str::slug($item->label ?? 'item');
+                $item->key = $base ?: (string) Str::uuid();
+
+                // If necessary, check uniqueness in the parent form.
+                $suffix = 1;
+                while (self::where('form_id', $item->form_id)
+                        ->where('key', $item->key)
+                        ->exists()) {
+                    $item->key = $base.'_'.$suffix++;
+                }
+            }
+        });
+    }
+    
     public function form(): BelongsTo
     {
         $formClass = config('formbuilder.models.form');
