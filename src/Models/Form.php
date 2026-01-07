@@ -14,9 +14,9 @@ class Form extends Model
     public const TABLE_CONFIG_KEY = 'forms';
 
     protected $fillable = [
-        'key',      // ex: technical_questionnaire
-        'title',        
-        'meta',     // json: description, help, etc.
+        'key',
+        'title',
+        'meta',
         'is_active',
     ];
 
@@ -27,7 +27,7 @@ class Form extends Model
 
     protected static function booted(): void
     {
-        static::creating(function (Form $form) {
+        static::creating(function (self $form) {
             if (empty($form->key)) {
                 $form->key = Str::slug($form->title ?? 'form') ?: (string) Str::uuid();
 

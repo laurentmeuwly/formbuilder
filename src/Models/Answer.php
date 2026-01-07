@@ -14,7 +14,7 @@ class Answer extends Model
 
     protected $fillable = [
         'answer_set_id',
-        'field_key',     // référence stable vers FormItem::key
+        'field_key',     // stable reference to FormItem::key
         'value',         // mixte (json)
         'meta',
     ];

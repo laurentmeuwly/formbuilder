@@ -16,17 +16,19 @@ class FormItem extends Model
 
     protected $fillable = [
         'form_id',
-        'key',               // ex: sample_mass
+        'key',               // ex: sample_mass or UUID
         'label',
         'type',              // enum ItemType
         'position',
-        'options',           // json (pour select/radio/checkbox)
-        'validation',        // json (required, min, max, pattern, etc.)
-        'meta',              // json (help, placeholder, unit, etc.)
+        'is_required',
+        'options',           // json (for select/radio/checkbox)
+        'validation',        // json (min, max, pattern, ...)
+        'meta',              // json (help, placeholder, unit, ...)
     ];
 
     protected $casts = [
         'type' => FormFieldType::class,
+        'is_required' => 'boolean',
         'options' => 'array',
         'validation' => 'array',
         'meta' => 'array',
@@ -34,19 +36,13 @@ class FormItem extends Model
 
     protected static function booted(): void
     {
-        static::creating(function (FormItem $item) {
+        static::creating(function (self $item) {
             if (empty($item->key)) {
-                
-                $base = Str::slug($item->label ?? 'item');
-                $item->key = $base ?: (string) Str::uuid();
+                $item->key = (string) Str::uuid();                
+            }
 
-                // If necessary, check uniqueness in the parent form.
-                $suffix = 1;
-                while (self::where('form_id', $item->form_id)
-                        ->where('key', $item->key)
-                        ->exists()) {
-                    $item->key = $base.'_'.$suffix++;
-                }
+            if (empty($item->label)) {
+                $item->label = 'item';
             }
         });
     }

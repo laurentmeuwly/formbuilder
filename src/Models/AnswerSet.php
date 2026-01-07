@@ -15,7 +15,7 @@ class AnswerSet extends Model
 
     protected $fillable = [
         'form_id',
-        'answerable_type', // morph: votre entité métier (Participation, etc.)
+        'answerable_type',
         'answerable_id',
         'submitted_at',
         'meta',
