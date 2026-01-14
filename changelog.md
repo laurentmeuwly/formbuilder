@@ -18,6 +18,8 @@ et ce projet adhère au versionnage sémantique **SemVer**.
 
 
 ---
+## [0.1.4] – 2026-01-14
+- Improve branching evaluator with visibility of items
 
 ## [0.1.3] – 2026-01-06
 - Added is_required boolean column to form items

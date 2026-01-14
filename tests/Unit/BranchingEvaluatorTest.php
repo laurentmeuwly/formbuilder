@@ -28,3 +28,18 @@ it('computes visible keys based on simple condition', function () {
 
     expect($visible)->toContain('granulo');
 });
+
+it('hides conditional questions by default', function () {
+    $form = Form::factory()
+        ->withItem('qa')
+        ->withItem('q7')
+        ->withRule([
+            'if' => ['field' => 'qa', 'op' => 'in', 'value' => 'other'],
+            'then' => ['show' => ['q7']],
+        ])
+        ->make();
+
+    $visible = BranchingEvaluator::visibleKeys($form, []);
+
+    expect($visible)->not->toContain('q7');
+});
