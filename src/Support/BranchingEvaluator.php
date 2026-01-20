@@ -6,24 +6,14 @@ use LaurentMeuwly\FormBuilder\Models\Form;
 
 class BranchingEvaluator
 {
-    /** Retourne les clés visibles selon les réponses partielles */
+    /** 
+     * Returns the list of visible keys based on the responses provided.
+     */
     public static function visibleKeys(Form $form, array $answers): array
     {
-        // Questions targeted by a "show" are hidden by default
+       // Questions targeted by a "show" are hidden by default
         $conditionallyShown = collect($form->branchingRules)
-            ->flatMap(function ($rule) {
-                $then = $rule->condition['then'] ?? [];
-
-                if (!empty($then['show'])) {
-                    return $then['show'];
-                }
-
-                if (($then['action'] ?? null) === 'show' && !empty($then['targets'])) {
-                    return $then['targets'];
-                }
-
-                return [];
-            })
+            ->flatMap(fn ($rule) => $rule->condition['then']['show'] ?? [])
             ->unique()
             ->values()
             ->all();
@@ -37,30 +27,26 @@ class BranchingEvaluator
 
         // Enforcement of rules
         foreach ($form->branchingRules as $rule) {
-            $c = $rule->condition['if'] ?? null;
-            $then = $rule->condition['then'] ?? [];
-
-            if (! $c || ! isset($c['field'], $c['op'])) {
+            $condition  = $rule->condition['if'] ?? null;
+            $effects    = $rule->condition['then'] ?? [];
+            
+            if (! self::isValidCondition($condition)) {
                 continue;
             }
 
-            $actual = $answers[$c['field']] ?? null;
+            $actual = $answers[$condition['field']] ?? null;            
 
-            if (! self::match($actual, $c['op'], $c['value'] ?? null)) {
+            if (! self::match($actual, $condition['op'], $condition['value'] ?? null)) {
                 continue;
             }
 
-            foreach ($then['show'] ?? [] as $key) {
+            // SHOW
+            foreach ($effects['show'] ?? [] as $key) {
                 $visible[$key] = true;
             }
 
-            if (($then['action'] ?? null) === 'show') {
-                foreach ($then['targets'] ?? [] as $key) {
-                    $visible[$key] = true;
-                }
-            }
-
-            foreach ($then['hide'] ?? [] as $key) {
+            // HIDE
+            foreach ($effects['hide'] ?? [] as $key) {
                 $visible[$key] = false;
             }
         }
@@ -68,19 +54,31 @@ class BranchingEvaluator
         return array_keys(array_filter($visible));
     }
 
+    /**
+     * Verifies that a condition is usable.
+     */
+    protected static function isValidCondition(?array $condition): bool
+    {
+        return is_array($condition)
+            && isset($condition['field'], $condition['op']);
+    }
+
+    /**
+     * Evaluates a simple condition.
+     */
     protected static function match($actual, string $op, $expected): bool
     {
         return match ($op) {
-            '=', '==' => $actual == $expected,
-            '!=', '<>' => $actual != $expected,
-            '>' => is_numeric($actual) && is_numeric($expected) && $actual > $expected,
-            '<' => is_numeric($actual) && is_numeric($expected) && $actual < $expected,
-            '>=' => is_numeric($actual) && is_numeric($expected) && $actual >= $expected,
-            '<=' => is_numeric($actual) && is_numeric($expected) && $actual <= $expected,
+            '=', '=='   => $actual == $expected,
+            '!=', '<>'  => $actual != $expected,
+            '>'     => is_numeric($actual) && is_numeric($expected) && $actual > $expected,
+            '<'     => is_numeric($actual) && is_numeric($expected) && $actual < $expected,
+            '>='    => is_numeric($actual) && is_numeric($expected) && $actual >= $expected,
+            '<='    => is_numeric($actual) && is_numeric($expected) && $actual <= $expected,
             
             'in' => match (true) {
                 is_array($actual)   => in_array($expected, $actual, true),   // checkbox
-                is_string($actual) => str_contains($actual, (string) $expected),
+                is_string($actual)  => str_contains($actual, (string) $expected),
                 default             => false,
             },
 
