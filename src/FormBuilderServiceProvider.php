@@ -5,9 +5,8 @@ namespace LaurentMeuwly\FormBuilder;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Collection;
 use Illuminate\Support\ServiceProvider;
-use LaurentMeuwly\FormBuilder\Renderers\NullRenderer;
 use LaurentMeuwly\FormBuilder\Contracts\RendersForm;
-
+use LaurentMeuwly\FormBuilder\Renderers\NullRenderer;
 
 class FormBuilderServiceProvider extends ServiceProvider
 {
@@ -17,6 +16,7 @@ class FormBuilderServiceProvider extends ServiceProvider
 
         $this->app->singleton(RendersForm::class, function ($app) {
             $class = config('formbuilder.renderer', NullRenderer::class);
+
             return $app->make($class);
         });
     }
@@ -35,7 +35,7 @@ class FormBuilderServiceProvider extends ServiceProvider
             __DIR__.'/../database/migrations/add_is_required_to_form_items_table.php.stub' => $this->getMigrationFileName('add_is_required_to_form_items_table.php'),
         ], 'formbuilder-migrations');
 
-        $this->loadRoutesFrom(__DIR__.'/../routes/web.php');        
+        $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
     }
 
     /**

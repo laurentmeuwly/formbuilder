@@ -11,7 +11,7 @@ class AnswerSet extends Model
 {
     use UsesConfiguredTable;
 
-    public const TABLE_CONFIG_KEY = 'answer_sets';    
+    public const TABLE_CONFIG_KEY = 'answer_sets';
 
     protected $fillable = [
         'form_id',
@@ -29,12 +29,14 @@ class AnswerSet extends Model
     public function form(): BelongsTo
     {
         $formClass = config('formbuilder.models.form');
+
         return $this->belongsTo($formClass);
     }
 
     public function answers(): HasMany
     {
         $answerClass = config('formbuilder.models.answer');
+
         return $this->hasMany($answerClass);
     }
 

@@ -38,7 +38,7 @@ class FormItem extends Model
     {
         static::creating(function (self $item) {
             if (empty($item->key)) {
-                $item->key = (string) Str::uuid();                
+                $item->key = (string) Str::uuid();
             }
 
             if (empty($item->label)) {
@@ -46,10 +46,11 @@ class FormItem extends Model
             }
         });
     }
-    
+
     public function form(): BelongsTo
     {
         $formClass = config('formbuilder.models.form');
+
         return $this->belongsTo($formClass, 'form_id');
     }
 }

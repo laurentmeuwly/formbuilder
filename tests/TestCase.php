@@ -6,8 +6,9 @@ namespace LaurentMeuwly\FormBuilder\Tests;
 
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Orchestra\Testbench\TestCase as Orchestra;
 use LaurentMeuwly\FormBuilder\FormBuilderServiceProvider;
+use LaurentMeuwly\FormBuilder\Renderers\NullRenderer;
+use Orchestra\Testbench\TestCase as Orchestra;
 
 class TestCase extends Orchestra
 {
@@ -21,28 +22,28 @@ class TestCase extends Orchestra
         // DB sqlite in-memory
         $app['config']->set('database.default', 'sqlite');
         $app['config']->set('database.connections.sqlite', [
-            'driver'   => 'sqlite',
+            'driver' => 'sqlite',
             'database' => ':memory:',
-            'prefix'   => '',
+            'prefix' => '',
         ]);
 
         // Table names configurables (doivent correspondre à ta config)
         $app['config']->set('formbuilder.table_names', [
-            'forms'          => 'fb_forms',
-            'form_items'     => 'fb_form_items',
-            'branching_rules'=> 'fb_branching_rules',
-            'answer_sets'    => 'fb_answer_sets',
-            'answers'        => 'fb_answers',
+            'forms' => 'fb_forms',
+            'form_items' => 'fb_form_items',
+            'branching_rules' => 'fb_branching_rules',
+            'answer_sets' => 'fb_answer_sets',
+            'answers' => 'fb_answers',
         ]);
 
         // Renderer par défaut (n’impose pas Filament)
-        $app['config']->set('formbuilder.renderer', \LaurentMeuwly\FormBuilder\Renderers\NullRenderer::class);
+        $app['config']->set('formbuilder.renderer', NullRenderer::class);
     }
 
     protected function defineDatabaseMigrations()
     {
         // Charge les migrations du package (chemin réel du package)
-        //$this->loadMigrationsFrom(realpath(__DIR__.'/../..').'/database/migrations');
+        // $this->loadMigrationsFrom(realpath(__DIR__.'/../..').'/database/migrations');
         $this->loadMigrationsFrom(__DIR__.'/migrations');
 
         // Table factice pour une entité métier (utilisée par le Feature test)

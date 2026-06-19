@@ -6,12 +6,12 @@ use LaurentMeuwly\FormBuilder\Models\Form;
 
 class BranchingEvaluator
 {
-    /** 
+    /**
      * Returns the list of visible keys based on the responses provided.
      */
     public static function visibleKeys(Form $form, array $answers): array
     {
-       // Questions targeted by a "show" are hidden by default
+        // Questions targeted by a "show" are hidden by default
         $conditionallyShown = collect($form->branchingRules)
             ->flatMap(fn ($rule) => $rule->condition['then']['show'] ?? [])
             ->unique()
@@ -27,14 +27,14 @@ class BranchingEvaluator
 
         // Enforcement of rules
         foreach ($form->branchingRules as $rule) {
-            $condition  = $rule->condition['if'] ?? null;
-            $effects    = $rule->condition['then'] ?? [];
-            
+            $condition = $rule->condition['if'] ?? null;
+            $effects = $rule->condition['then'] ?? [];
+
             if (! self::isValidCondition($condition)) {
                 continue;
             }
 
-            $actual = $answers[$condition['field']] ?? null;            
+            $actual = $answers[$condition['field']] ?? null;
 
             if (! self::match($actual, $condition['op'], $condition['value'] ?? null)) {
                 continue;
@@ -69,17 +69,17 @@ class BranchingEvaluator
     protected static function match($actual, string $op, $expected): bool
     {
         return match ($op) {
-            '=', '=='   => $actual == $expected,
-            '!=', '<>'  => $actual != $expected,
-            '>'     => is_numeric($actual) && is_numeric($expected) && $actual > $expected,
-            '<'     => is_numeric($actual) && is_numeric($expected) && $actual < $expected,
-            '>='    => is_numeric($actual) && is_numeric($expected) && $actual >= $expected,
-            '<='    => is_numeric($actual) && is_numeric($expected) && $actual <= $expected,
-            
+            '=', '==' => $actual == $expected,
+            '!=', '<>' => $actual != $expected,
+            '>' => is_numeric($actual) && is_numeric($expected) && $actual > $expected,
+            '<' => is_numeric($actual) && is_numeric($expected) && $actual < $expected,
+            '>=' => is_numeric($actual) && is_numeric($expected) && $actual >= $expected,
+            '<=' => is_numeric($actual) && is_numeric($expected) && $actual <= $expected,
+
             'in' => match (true) {
-                is_array($actual)   => in_array($expected, $actual, true),   // checkbox
-                is_string($actual)  => str_contains($actual, (string) $expected),
-                default             => false,
+                is_array($actual) => in_array($expected, $actual, true),   // checkbox
+                is_string($actual) => str_contains($actual, (string) $expected),
+                default => false,
             },
 
             default => false,

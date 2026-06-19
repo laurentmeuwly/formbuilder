@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace LaurentMeuwly\FormBuilder\Tests\Feature;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
 use LaurentMeuwly\FormBuilder\Enums\FormFieldType;
-use LaurentMeuwly\FormBuilder\Models\{Form, FormItem, BranchingRule, AnswerSet};
+use LaurentMeuwly\FormBuilder\Models\AnswerSet;
+use LaurentMeuwly\FormBuilder\Models\Form;
 use LaurentMeuwly\FormBuilder\Renderers\NullRenderer;
-use LaurentMeuwly\FormBuilder\Support\{BranchingEvaluator, ValidationRuleBuilder};
+use LaurentMeuwly\FormBuilder\Support\BranchingEvaluator;
+use LaurentMeuwly\FormBuilder\Support\ValidationRuleBuilder;
 use LaurentMeuwly\FormBuilder\Tests\TestCase;
-use Illuminate\Database\Eloquent\Model;
 use LaurentMeuwly\FormBuilder\Traits\HasDynamicForm;
 
 uses(TestCase::class);
@@ -21,6 +23,7 @@ class TestParticipant extends Model
     use HasDynamicForm;
 
     protected $table = 'test_participants';
+
     protected $guarded = [];
 }
 
@@ -34,41 +37,41 @@ it('runs full flow: migrations, CRUD, rendering, validation, answers', function 
 
     // 2) Crée un formulaire + champs + règle
     $form = Form::create([
-        'key'       => 'technical_questionnaire_v1',
-        'title'     => 'Questionnaire technique',        
+        'key' => 'technical_questionnaire_v1',
+        'title' => 'Questionnaire technique',
         'is_active' => true,
     ]);
 
     $form->items()->createMany([
         [
-            'key'       => 'sample_type',
-            'label'     => "Type d'échantillon",
-            'type'      => FormFieldType::SELECT,
-            'position'  => 1,
-            'options'   => [
+            'key' => 'sample_type',
+            'label' => "Type d'échantillon",
+            'type' => FormFieldType::SELECT,
+            'position' => 1,
+            'options' => [
                 ['value' => 'solid',  'label' => 'Solide'],
                 ['value' => 'liquid', 'label' => 'Liquide'],
             ],
-            'validation'=> ['required' => true],
+            'validation' => ['required' => true],
         ],
         [
-            'key'       => 'granulometry',
-            'label'     => 'Granulométrie (µm)',
-            'type'      => FormFieldType::NUMBER,
-            'position'  => 2,
-            'validation'=> ['min' => 0],
+            'key' => 'granulometry',
+            'label' => 'Granulométrie (µm)',
+            'type' => FormFieldType::NUMBER,
+            'position' => 2,
+            'validation' => ['min' => 0],
         ],
     ]);
 
     $form->branchingRules()->create([
         'condition' => [
-            'if'   => ['field' => 'sample_type', 'op' => '=', 'value' => 'solid'],
+            'if' => ['field' => 'sample_type', 'op' => '=', 'value' => 'solid'],
             'then' => ['show' => ['granulometry']],
         ],
     ]);
 
     // 3) Rendering via NullRenderer (agnostique UI)
-    $schema = (new NullRenderer())->render($form);
+    $schema = (new NullRenderer)->render($form);
     expect($schema)->toHaveKeys(['form', 'items']);
     expect($schema['items'])->toBeArray()->and($schema['items'])->toHaveCount(2);
 

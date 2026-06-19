@@ -42,18 +42,21 @@ class Form extends Model
     public function items(): HasMany
     {
         $itemClass = config('formbuilder.models.form_item');
+
         return $this->hasMany($itemClass, 'form_id')->orderBy('position');
     }
 
     public function branchingRules(): HasMany
     {
         $ruleClass = config('formbuilder.models.branching');
+
         return $this->hasMany($ruleClass, 'form_id');
     }
 
     public function answerSets(): HasMany
     {
         $setClass = config('formbuilder.models.answer_set');
+
         return $this->hasMany($setClass, 'form_id');
     }
 }

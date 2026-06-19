@@ -25,13 +25,13 @@ class FilamentFormRenderer implements RendersForm
                     ->numeric(),
                 FormFieldType::SELECT => Forms\Components\Select::make($item->key)
                     ->label($item->label)
-                    ->options(collect($item->options ?? [])->pluck('label','value')->all()),
+                    ->options(collect($item->options ?? [])->pluck('label', 'value')->all()),
                 FormFieldType::RADIO => Forms\Components\Radio::make($item->key)
                     ->label($item->label)
-                    ->options(collect($item->options ?? [])->pluck('label','value')->all()),
+                    ->options(collect($item->options ?? [])->pluck('label', 'value')->all()),
                 FormFieldType::CHECKBOX => Forms\Components\CheckboxList::make($item->key)
                     ->label($item->label)
-                    ->options(collect($item->options ?? [])->pluck('label','value')->all()),
+                    ->options(collect($item->options ?? [])->pluck('label', 'value')->all()),
                 FormFieldType::DATE => Forms\Components\DatePicker::make($item->key)
                     ->label($item->label),
                 FormFieldType::FILE => Forms\Components\FileUpload::make($item->key)

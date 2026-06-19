@@ -10,7 +10,7 @@ class BranchingRule extends Model
 {
     use UsesConfiguredTable;
 
-    public const TABLE_CONFIG_KEY = 'branching_rules';    
+    public const TABLE_CONFIG_KEY = 'branching_rules';
 
     protected $fillable = [
         'form_id',
@@ -26,6 +26,7 @@ class BranchingRule extends Model
     public function form(): BelongsTo
     {
         $formClass = config('formbuilder.models.form');
+
         return $this->belongsTo($formClass);
     }
 }

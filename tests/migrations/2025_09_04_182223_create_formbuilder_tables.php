@@ -74,7 +74,7 @@ return new class extends Migration
         $tableNames = config('formbuilder.table_names');
 
         if (empty($tableNames)) {
-            throw new \Exception('Error: config/formbuilder.php not found and defaults could not be merged. Please publish the package configuration before proceeding, or drop the tables manually.');
+            throw new Exception('Error: config/formbuilder.php not found and defaults could not be merged. Please publish the package configuration before proceeding, or drop the tables manually.');
         }
 
         Schema::dropIfExists($tableNames['answers']);
@@ -84,4 +84,3 @@ return new class extends Migration
         Schema::dropIfExists($tableNames['forms']);
     }
 };
-        

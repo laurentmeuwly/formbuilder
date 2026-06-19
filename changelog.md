@@ -1,21 +1,18 @@
 # Changelog
 
-All notable changes to this package will be documented in this file.
+All notable changes to this project will be documented in this file.
 
-The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to Semantic Versioning **SemVer**.
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
+and this project adheres to **Semantic Versioning (SemVer)**.
 
 ---
 
 ## [Unreleased]
-### Ajouté
-- (exemple) Support de fichiers supplémentaires
 
-### Modifié
-- (exemple) Amélioration des performances dans les relations
-
-### Supprimé
-- (exemple) Retrait d’une méthode dépréciée
+### Added
+### Changed
+### Fixed
+### Removed
 
 ---
 
