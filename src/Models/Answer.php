@@ -4,8 +4,19 @@ namespace LaurentMeuwly\FormBuilder\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 use LaurentMeuwly\FormBuilder\Traits\UsesConfiguredTable;
 
+/**
+ * @property int $id
+ * @property int $answer_set_id
+ * @property string $field_key
+ * @property mixed $value
+ * @property array<string, mixed>|null $meta
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read AnswerSet $answerSet
+ */
 class Answer extends Model
 {
     use UsesConfiguredTable;
@@ -14,8 +25,8 @@ class Answer extends Model
 
     protected $fillable = [
         'answer_set_id',
-        'field_key',     // stable reference to FormItem::key
-        'value',         // mixte (json)
+        'field_key',    // stable reference to FormItem::key
+        'value',        // any JSON value
         'meta',
     ];
 
@@ -26,8 +37,6 @@ class Answer extends Model
 
     public function answerSet(): BelongsTo
     {
-        $answerSetClass = config('formbuilder.models.answer_set');
-
-        return $this->belongsTo($answerSetClass, 'answer_set_id');
+        return $this->belongsTo(config('formbuilder.models.answer_set'), 'answer_set_id');
     }
 }

@@ -2,11 +2,27 @@
 
 namespace LaurentMeuwly\FormBuilder\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 use LaurentMeuwly\FormBuilder\Traits\UsesConfiguredTable;
 
+/**
+ * @property int $id
+ * @property int $form_id
+ * @property string $answerable_type
+ * @property int|string $answerable_id
+ * @property Carbon|null $submitted_at
+ * @property array<string, mixed>|null $meta
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Form $form
+ * @property-read Collection<int, Answer> $answers
+ * @property-read Model $answerable
+ */
 class AnswerSet extends Model
 {
     use UsesConfiguredTable;
@@ -28,19 +44,15 @@ class AnswerSet extends Model
 
     public function form(): BelongsTo
     {
-        $formClass = config('formbuilder.models.form');
-
-        return $this->belongsTo($formClass);
+        return $this->belongsTo(config('formbuilder.models.form'), 'form_id');
     }
 
     public function answers(): HasMany
     {
-        $answerClass = config('formbuilder.models.answer');
-
-        return $this->hasMany($answerClass);
+        return $this->hasMany(config('formbuilder.models.answer'), 'answer_set_id');
     }
 
-    public function answerable()
+    public function answerable(): MorphTo
     {
         return $this->morphTo();
     }

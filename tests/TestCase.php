@@ -1,53 +1,43 @@
 <?php
 
-declare(strict_types=1);
-
 namespace LaurentMeuwly\FormBuilder\Tests;
 
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use LaurentMeuwly\FormBuilder\FormBuilderServiceProvider;
-use LaurentMeuwly\FormBuilder\Renderers\NullRenderer;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 class TestCase extends Orchestra
 {
-    protected function getPackageProviders($app)
+    protected function getPackageProviders($app): array
     {
         return [FormBuilderServiceProvider::class];
     }
 
-    protected function defineEnvironment($app)
+    protected function defineEnvironment($app): void
     {
-        // DB sqlite in-memory
-        $app['config']->set('database.default', 'sqlite');
-        $app['config']->set('database.connections.sqlite', [
+        $app['config']->set('database.default', 'testing');
+        $app['config']->set('database.connections.testing', [
             'driver' => 'sqlite',
             'database' => ':memory:',
             'prefix' => '',
+            'foreign_key_constraints' => true,
         ]);
-
-        // Table names configurables (doivent correspondre à ta config)
-        $app['config']->set('formbuilder.table_names', [
-            'forms' => 'fb_forms',
-            'form_items' => 'fb_form_items',
-            'branching_rules' => 'fb_branching_rules',
-            'answer_sets' => 'fb_answer_sets',
-            'answers' => 'fb_answers',
-        ]);
-
-        // Renderer par défaut (n’impose pas Filament)
-        $app['config']->set('formbuilder.renderer', NullRenderer::class);
     }
 
-    protected function defineDatabaseMigrations()
+    protected function defineDatabaseMigrations(): void
     {
-        // Charge les migrations du package (chemin réel du package)
-        // $this->loadMigrationsFrom(realpath(__DIR__.'/../..').'/database/migrations');
-        $this->loadMigrationsFrom(__DIR__.'/migrations');
+        // Run the real package migrations, in their publication order.
+        foreach ([
+            'create_formbuilder_tables.php.stub',
+            'add_is_required_to_form_items_table.php.stub',
+        ] as $stub) {
+            $migration = include __DIR__.'/../database/migrations/'.$stub;
+            $migration->up();
+        }
 
-        // Table factice pour une entité métier (utilisée par le Feature test)
-        Schema::create('test_participants', function (Blueprint $table) {
+        // Host-application model answering forms (see Fixtures\Participant).
+        Schema::create('participants', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->timestamps();

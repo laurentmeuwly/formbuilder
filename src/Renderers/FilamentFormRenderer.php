@@ -9,15 +9,26 @@ use LaurentMeuwly\FormBuilder\Models\Form;
 
 class FilamentFormRenderer implements RendersForm
 {
+    /**
+     * Return Filament form components for every item of the form.
+     *
+     * Requires filament/forms (3.x, 4.x or 5.x).
+     *
+     * @param  array<string, mixed>  $context
+     * @return list<Forms\Components\Field>
+     */
     public function render(Form $form, array $context = []): array
     {
         $components = [];
 
         foreach ($form->items as $item) {
+            if ($item->type === null) {
+                continue;
+            }
+
             $comp = match ($item->type) {
                 FormFieldType::TEXT => Forms\Components\TextInput::make($item->key)
-                    ->label($item->label)
-                    ->required(($item->validation['required'] ?? false) === true),
+                    ->label($item->label),
                 FormFieldType::TEXTAREA => Forms\Components\Textarea::make($item->key)
                     ->label($item->label),
                 FormFieldType::NUMBER => Forms\Components\TextInput::make($item->key)
@@ -38,7 +49,7 @@ class FilamentFormRenderer implements RendersForm
                     ->label($item->label),
             };
 
-            $components[] = $comp;
+            $components[] = $comp->required($item->isRequired());
         }
 
         return $components;

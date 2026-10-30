@@ -2,11 +2,25 @@
 
 namespace LaurentMeuwly\FormBuilder\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use LaurentMeuwly\FormBuilder\Traits\UsesConfiguredTable;
 
+/**
+ * @property int $id
+ * @property string $key
+ * @property string $title
+ * @property array<string, mixed>|null $meta
+ * @property bool $is_active
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Collection<int, FormItem> $items
+ * @property-read Collection<int, BranchingRule> $branchingRules
+ * @property-read Collection<int, AnswerSet> $answerSets
+ */
 class Form extends Model
 {
     use UsesConfiguredTable;
@@ -27,36 +41,35 @@ class Form extends Model
 
     protected static function booted(): void
     {
-        static::creating(function (self $form) {
-            if (empty($form->key)) {
-                $form->key = Str::slug($form->title ?? 'form') ?: (string) Str::uuid();
-
-                $suffix = 1;
-                while (self::where('key', $form->key)->exists()) {
-                    $form->key = $form->key.'_'.$suffix++;
-                }
+        static::creating(function (Form $form) {
+            if (! empty($form->key)) {
+                return;
             }
+
+            $base = Str::slug($form->title ?? 'form') ?: (string) Str::uuid();
+            $key = $base;
+            $suffix = 1;
+
+            while ($form->newQuery()->where('key', $key)->exists()) {
+                $key = $base.'_'.$suffix++;
+            }
+
+            $form->key = $key;
         });
     }
 
     public function items(): HasMany
     {
-        $itemClass = config('formbuilder.models.form_item');
-
-        return $this->hasMany($itemClass, 'form_id')->orderBy('position');
+        return $this->hasMany(config('formbuilder.models.form_item'), 'form_id')->orderBy('position');
     }
 
     public function branchingRules(): HasMany
     {
-        $ruleClass = config('formbuilder.models.branching');
-
-        return $this->hasMany($ruleClass, 'form_id');
+        return $this->hasMany(config('formbuilder.models.branching'), 'form_id');
     }
 
     public function answerSets(): HasMany
     {
-        $setClass = config('formbuilder.models.answer_set');
-
-        return $this->hasMany($setClass, 'form_id');
+        return $this->hasMany(config('formbuilder.models.answer_set'), 'form_id');
     }
 }

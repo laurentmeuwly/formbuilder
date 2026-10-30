@@ -21,3 +21,8 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+# Package: no lock file, tool caches
+composer.lock
+/.phpunit.cache
+.phpunit.result.cache

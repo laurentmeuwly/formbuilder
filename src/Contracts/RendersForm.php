@@ -6,6 +6,10 @@ use LaurentMeuwly\FormBuilder\Models\Form;
 
 interface RendersForm
 {
-    /** Returns a representation that can be consumed by a UI (e.g., Filament schema) */
+    /**
+     * Return a representation that a UI can consume (e.g. a Filament schema).
+     *
+     * @param  array<string, mixed>  $context
+     */
     public function render(Form $form, array $context = []): mixed;
 }

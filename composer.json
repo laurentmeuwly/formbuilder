@@ -1,8 +1,16 @@
 {
     "name": "laurentmeuwly/formbuilder",
-    "description": "Advanced form builder for Laravel application",
+    "description": "Database-driven dynamic forms for Laravel: form definitions, conditional branching, validation rules and answer storage.",
     "type": "library",
     "license": "MIT",
+    "keywords": [
+        "laravel",
+        "forms",
+        "form-builder",
+        "dynamic-forms",
+        "branching",
+        "filament"
+    ],
     "authors": [
         {
             "name": "Laurent Meuwly",
@@ -11,6 +19,26 @@
             "role": "Developer"
         }
     ],
+    "require": {
+        "php": "^8.2",
+        "illuminate/database": "^12.0|^13.0",
+        "illuminate/filesystem": "^12.0|^13.0",
+        "illuminate/support": "^12.0|^13.0",
+        "illuminate/validation": "^12.0|^13.0"
+    },
+    "require-dev": {
+        "filament/forms": "^3.3|^4.0|^5.0",
+        "larastan/larastan": "^3.0",
+        "laravel/pint": "^1.0",
+        "orchestra/testbench": "^10.0|^11.0",
+        "pestphp/pest": "^3.0|^4.0",
+        "pestphp/pest-plugin-laravel": "^3.0|^4.0",
+        "phpstan/phpstan": "^2.1",
+        "phpunit/phpunit": "^11.5|^12.0"
+    },
+    "suggest": {
+        "filament/forms": "Required only if you use the optional FilamentFormRenderer (Filament 3, 4 or 5)."
+    },
     "autoload": {
         "psr-4": {
             "LaurentMeuwly\\FormBuilder\\": "src/"
@@ -18,7 +46,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "LaurentMeuwly\\FormBuilder\\Tests\\": "tests"
+            "LaurentMeuwly\\FormBuilder\\Tests\\": "tests/"
         }
     },
     "extra": {
@@ -31,30 +59,19 @@
             }
         }
     },
-    "require": {
-        "php": ">=8.2",
-        "illuminate/support": "^11.0|^12.0",
-        "illuminate/database": "^11.0|^12.0",
-        "illuminate/validation": "^11.0|^12.0"
-    },
-    "require-dev": {
-        "laravel/pint": "^1.0",
-        "orchestra/testbench": "^9.0|^10.0",
-        "phpunit/phpunit": "^11.5|^12.0",
-        "pestphp/pest": "^3.0|^4.0",
-        "pestphp/pest-plugin-laravel": "^3.0|^4.0",
-        "phpstan/phpstan": "^2.1",
-        "larastan/larastan": "^3.8",
-        "filament/forms": "^3.3"
-    },
-    "suggest": {
-        "filament/forms": "Required only if you use the optional Filament renderer."
-    },
     "minimum-stability": "stable",
     "prefer-stable": true,
     "config": {
+        "sort-packages": true,
         "allow-plugins": {
             "pestphp/pest-plugin": true
         }
+    },
+    "scripts": {
+        "test": "vendor/bin/pest",
+        "test-coverage": "vendor/bin/pest --coverage",
+        "analyse": "vendor/bin/phpstan analyse",
+        "format": "vendor/bin/pint",
+        "lint": "vendor/bin/pint --test"
     }
 }

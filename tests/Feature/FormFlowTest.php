@@ -1,46 +1,23 @@
 <?php
 
-declare(strict_types=1);
-
-namespace LaurentMeuwly\FormBuilder\Tests\Feature;
-
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
 use LaurentMeuwly\FormBuilder\Enums\FormFieldType;
 use LaurentMeuwly\FormBuilder\Models\AnswerSet;
 use LaurentMeuwly\FormBuilder\Models\Form;
-use LaurentMeuwly\FormBuilder\Renderers\NullRenderer;
 use LaurentMeuwly\FormBuilder\Support\BranchingEvaluator;
 use LaurentMeuwly\FormBuilder\Support\ValidationRuleBuilder;
-use LaurentMeuwly\FormBuilder\Tests\TestCase;
-use LaurentMeuwly\FormBuilder\Traits\HasDynamicForm;
+use LaurentMeuwly\FormBuilder\Tests\Fixtures\Participant;
 
-uses(TestCase::class);
+it('creates the configured tables', function () {
+    foreach (config('formbuilder.table_names') as $table) {
+        expect(Schema::hasTable($table))->toBeTrue();
+    }
 
-// Modèle métier factice pour le test
-class TestParticipant extends Model
-{
-    use HasDynamicForm;
+    expect(Schema::hasColumn(config('formbuilder.table_names.form_items'), 'is_required'))->toBeTrue();
+});
 
-    protected $table = 'test_participants';
-
-    protected $guarded = [];
-}
-
-it('runs full flow: migrations, CRUD, rendering, validation, answers', function () {
-    // 1) Vérifie que les tables configurées existent
-    expect(Schema::hasTable(config('formbuilder.table_names.forms')))->toBeTrue();
-    expect(Schema::hasTable(config('formbuilder.table_names.form_items')))->toBeTrue();
-    expect(Schema::hasTable(config('formbuilder.table_names.branching_rules')))->toBeTrue();
-    expect(Schema::hasTable(config('formbuilder.table_names.answer_sets')))->toBeTrue();
-    expect(Schema::hasTable(config('formbuilder.table_names.answers')))->toBeTrue();
-
-    // 2) Crée un formulaire + champs + règle
-    $form = Form::create([
-        'key' => 'technical_questionnaire_v1',
-        'title' => 'Questionnaire technique',
-        'is_active' => true,
-    ]);
+it('runs a complete flow: definition, branching, validation and answers', function () {
+    $form = Form::create(['key' => 'technical_questionnaire_v1', 'title' => 'Questionnaire technique']);
 
     $form->items()->createMany([
         [
@@ -48,11 +25,11 @@ it('runs full flow: migrations, CRUD, rendering, validation, answers', function 
             'label' => "Type d'échantillon",
             'type' => FormFieldType::SELECT,
             'position' => 1,
+            'is_required' => true,
             'options' => [
-                ['value' => 'solid',  'label' => 'Solide'],
+                ['value' => 'solid', 'label' => 'Solide'],
                 ['value' => 'liquid', 'label' => 'Liquide'],
             ],
-            'validation' => ['required' => true],
         ],
         [
             'key' => 'granulometry',
@@ -70,29 +47,33 @@ it('runs full flow: migrations, CRUD, rendering, validation, answers', function 
         ],
     ]);
 
-    // 3) Rendering via NullRenderer (agnostique UI)
-    $schema = (new NullRenderer)->render($form);
-    expect($schema)->toHaveKeys(['form', 'items']);
-    expect($schema['items'])->toBeArray()->and($schema['items'])->toHaveCount(2);
+    $form = $form->fresh(['items', 'branchingRules']);
 
-    // 4) Règles de validation dynamiques
-    $rules = ValidationRuleBuilder::for($form);
-    expect($rules['sample_type'])->toContain('required');
-    expect($rules['granulometry'])->toContain('nullable', 'min:0');
+    expect(ValidationRuleBuilder::for($form))->toMatchArray([
+        'sample_type' => ['required'],
+        'granulometry' => ['nullable', 'numeric', 'min:0'],
+    ])
+        ->and(BranchingEvaluator::visibleKeys($form, ['sample_type' => 'solid']))->toBe(['sample_type', 'granulometry'])
+        ->and(BranchingEvaluator::visibleKeys($form, ['sample_type' => 'liquid']))->toBe(['sample_type']);
 
-    // 5) Visibilité dynamique
-    $visible = BranchingEvaluator::visibleKeys($form, ['sample_type' => 'solid']);
-    expect($visible)->toContain('granulometry');
-
-    // 6) Sauvegarde des réponses via un modèle métier + trait
-    $participant = TestParticipant::create(['name' => 'Lab X']);
-    /** @var AnswerSet $set */
+    $participant = Participant::create(['name' => 'Lab X']);
     $set = $participant->startAnswerSet($form, ['context' => 'demo']);
 
     $set->answers()->createMany([
-        ['field_key' => 'sample_type',  'value' => 'solid'],
+        ['field_key' => 'sample_type', 'value' => 'solid'],
         ['field_key' => 'granulometry', 'value' => 12],
     ]);
 
-    expect($set->answers()->count())->toBe(2);
+    $set = AnswerSet::with(['answers', 'answerable', 'form'])->findOrFail($set->id);
+
+    expect($set->meta)->toBe(['context' => 'demo'])
+        ->and($set->form->is($form))->toBeTrue()
+        ->and($set->answerable->is($participant))->toBeTrue()
+        // Row order is not guaranteed without ORDER BY: compare sorted by key
+        ->and($set->answers->pluck('value', 'field_key')->sortKeys()->all())->toBe([
+            'granulometry' => 12,
+            'sample_type' => 'solid',
+        ])
+        ->and($participant->formAnswerSets()->count())->toBe(1)
+        ->and($form->answerSets()->count())->toBe(1);
 });

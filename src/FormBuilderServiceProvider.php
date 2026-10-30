@@ -2,54 +2,79 @@
 
 namespace LaurentMeuwly\FormBuilder;
 
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Filesystem\Filesystem;
-use Illuminate\Support\Collection;
 use Illuminate\Support\ServiceProvider;
+use InvalidArgumentException;
 use LaurentMeuwly\FormBuilder\Contracts\RendersForm;
 use LaurentMeuwly\FormBuilder\Renderers\NullRenderer;
 
 class FormBuilderServiceProvider extends ServiceProvider
 {
+    /**
+     * Package migrations, in the order they must run.
+     *
+     * @var list<string>
+     */
+    protected const MIGRATIONS = [
+        'create_formbuilder_tables.php',
+        'add_is_required_to_form_items_table.php',
+    ];
+
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__.'/../config/formbuilder.php', 'formbuilder');
 
-        $this->app->singleton(RendersForm::class, function ($app) {
+        $this->app->singleton(RendersForm::class, function (Application $app): RendersForm {
             $class = config('formbuilder.renderer', NullRenderer::class);
 
-            return $app->make($class);
+            $renderer = $app->make($class);
+
+            if (! $renderer instanceof RendersForm) {
+                throw new InvalidArgumentException(sprintf(
+                    'The configured formbuilder renderer [%s] must implement %s.',
+                    is_string($class) ? $class : get_debug_type($class),
+                    RendersForm::class,
+                ));
+            }
+
+            return $renderer;
         });
     }
 
     public function boot(): void
     {
+        if (! $this->app->runningInConsole()) {
+            return;
+        }
+
         $this->publishes([
             __DIR__.'/../config/formbuilder.php' => config_path('formbuilder.php'),
         ], 'formbuilder-config');
 
-        $this->publishes([
-            __DIR__.'/../database/migrations/create_formbuilder_tables.php.stub' => $this->getMigrationFileName('create_formbuilder_tables.php'),
-        ], 'formbuilder-migrations');
+        $migrations = [];
+        $now = time();
 
-        $this->publishes([
-            __DIR__.'/../database/migrations/add_is_required_to_form_items_table.php.stub' => $this->getMigrationFileName('add_is_required_to_form_items_table.php'),
-        ], 'formbuilder-migrations');
+        foreach (self::MIGRATIONS as $offset => $migration) {
+            $migrations[__DIR__."/../database/migrations/{$migration}.stub"]
+                = $this->getMigrationFileName($migration, $now + $offset);
+        }
 
-        $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
+        $this->publishes($migrations, 'formbuilder-migrations');
     }
 
     /**
-     * Returns existing migration file if found, else uses the current timestamp.
+     * Return the already published migration if it exists, otherwise a new
+     * path timestamped with $timestamp. Each package migration gets its own
+     * second so that they always run in the intended order.
      */
-    protected function getMigrationFileName(string $migrationFileName): string
+    protected function getMigrationFileName(string $migrationFileName, int $timestamp): string
     {
-        $timestamp = date('Y_m_d_His');
+        $directory = $this->app->databasePath('migrations');
 
-        $filesystem = $this->app->make(Filesystem::class);
+        $existing = $this->app->make(Filesystem::class)
+            ->glob($directory.DIRECTORY_SEPARATOR.'*_'.$migrationFileName);
 
-        return Collection::make([$this->app->databasePath().DIRECTORY_SEPARATOR.'migrations'.DIRECTORY_SEPARATOR])
-            ->flatMap(fn ($path) => $filesystem->glob($path.'*_'.$migrationFileName))
-            ->push($this->app->databasePath()."/migrations/{$timestamp}_{$migrationFileName}")
-            ->first();
+        return $existing[0] ?? $directory.DIRECTORY_SEPARATOR.date('Y_m_d_His', $timestamp).'_'.$migrationFileName;
     }
 }

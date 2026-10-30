@@ -4,11 +4,12 @@ namespace LaurentMeuwly\FormBuilder\Traits;
 
 trait UsesConfiguredTable
 {
-    protected string $tableConfigKey;
-
+    /**
+     * Use the table name configured in `formbuilder.table_names` for the
+     * key given by the model's TABLE_CONFIG_KEY constant.
+     */
     public function getTable()
     {
-        // If classe defines TABLE_CONFIG_KEY, use it
         if (defined(static::class.'::TABLE_CONFIG_KEY')) {
             $key = constant(static::class.'::TABLE_CONFIG_KEY');
 

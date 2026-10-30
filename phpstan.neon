@@ -1,0 +1,14 @@
+includes:
+  - vendor/larastan/larastan/extension.neon
+
+parameters:
+  level: 5
+
+  paths:
+    - src
+
+  ignoreErrors:
+    # HasDynamicForm is meant to be used by host-application models,
+    # so it is never used inside the package itself.
+    - identifier: trait.unused
+      path: src/Traits/HasDynamicForm.php
